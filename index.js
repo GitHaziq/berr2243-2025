@@ -1,32 +1,30 @@
-const express = require('express');
-const { MongoClient } = require ('mongodb');
-const port = 3000
+const { MongoClient } = require('mongodb');
 
-const app = express();
-app.use(express.json());
+async function main() {
+  // Replace <connection-string> with your MongoDB URI
+  const uri = "mongodb://localhost:27017";
+  const client = new MongoClient(uri);
 
-let db;
+  try {
+    await client.connect();
+    console.log("Connected to Mongo!");
 
-async function main()
-{
-    const uri = "mongodb://localhost:27017"
-    const client = new MongoClient(uri);
+    const db = client.db("testDB");
+    const collection = db.collection("users");
 
-    try
-    {
-        await client.connect();
-        console.log("Connected to MongoDb!");
+    // Insert a document
+    await collection.insertOne({ name: "Alice", age: 25 });
+    console.log("Document inserted!");
 
-        db = client.db("testDB");
-    }
-    catch (err)
-    {
-        console.error("Error:", err);
-    }
+    // Query the document
+    const result = await collection.findOne({ name: "Alice" });
+    console.log("Query result:", result);
+
+  } catch (err) {
+    console.error("Error:", err);
+  } finally {
+    await client.close();
+  }
 }
 
-connectToMongoDB();
-
-app.listen(port, () =>{
-    console.log('Server Running on port ${port}');
-});
+main();
